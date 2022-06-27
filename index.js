@@ -11,6 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+const userPayments = [];
+
 const PORT = process.env.PORT;
 
 const getProducts = async (req, res) => {
@@ -19,27 +21,28 @@ const getProducts = async (req, res) => {
   res.json(data);
 };
 
-// const selectedProduct = async (req, res) => {
-//   // put selected product in session
-//   const { selectedProduct } = req.body;
-//   const { step } = req.query;
+const payment = (req, res) => {
+  const { data } = req.body;
 
-//   if (selectedProduct) {
-//     const obj = {
-//       sessionKey: `step${step}`,
-//       data: selectedProduct,
-//     };
-//     const { data } = await axios.post(
-//       'http://localhost:5000/api/v1/session',
-//       obj
-//     );
-//     return res.json({ messge: 'successfully added data in session' });
-//   } else {
-//     res.status(404).json({ messge: 'Selected Product Not Found' });
-//   }
-// };
+  userPayments.push({ ...data });
+
+  res.json({ message: 'successfully added payment information' });
+};
+
+const getUserDetails = (req, res) => {
+  const { email } = req.params;
+
+  const user = userPayments.find((x) => x.email === email);
+
+  if (user) {
+    return res.json(user);
+  } else {
+    return res.send(404);
+  }
+};
 
 app.get('/api/v1/products', getProducts);
-// app.post('/api/v1/products', selectedProduct);
+app.post('/api/v1/payment', payment);
+app.get('/api/v1/user/:email', getUserDetails);
 
 app.listen(PORT, () => console.log(`metronet app is running on port ${PORT}`));
